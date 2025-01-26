@@ -4,7 +4,7 @@ A customizable, terminal-based menu system that allows users to easily navigate 
 
 ## Features
 
-- **Customizable Greetings**: Displays different greetings based on the time of day (Morning, Afternoon, Evening, Night).
+- **Customizable Greetings**: Displays different greetings based on the time of day (Morning, Afternoon, Evening, Night)
 - **File Browser**: Navigate through directories and open files for editing.
 - **Command Launcher**: Run custom commands or predefined terminal programs from the menu.
 - **Flexible Configuration**: Customize the menu, appearance, greetings, and programs via a simple `config.yaml` file.
