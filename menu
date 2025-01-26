@@ -1,0 +1,181 @@
+#!/bin/bash
+
+# Configuration file location
+CONFIG_FILE="$HOME/.config/config.yaml"
+
+# Load configuration from YAML (basic parsing)
+function load_config {
+    if [[ -f "$CONFIG_FILE" ]]; then
+        files_directory=$(grep -P '^\s*files_directory:\s*' "$CONFIG_FILE" | cut -d: -f2 | xargs)
+        highlight_color=$(grep -P '^\s*highlight_color:\s*' "$CONFIG_FILE" | cut -d: -f2 | xargs)
+        text_color=$(grep -P '^\s*text_color:\s*' "$CONFIG_FILE" | cut -d: -f2 | xargs)
+        background_color=$(grep -P '^\s*background_color:\s*' "$CONFIG_FILE" | cut -d: -f2 | xargs)
+
+        # Load greetings
+        morning_greeting=$(grep -P '^\s*morning:\s*' "$CONFIG_FILE" | cut -d: -f2 | xargs)
+        afternoon_greeting=$(grep -P '^\s*afternoon:\s*' "$CONFIG_FILE" | cut -d: -f2 | xargs)
+        evening_greeting=$(grep -P '^\s*evening:\s*' "$CONFIG_FILE" | cut -d: -f2 | xargs)
+        night_greeting=$(grep -P '^\s*night:\s*' "$CONFIG_FILE" | cut -d: -f2 | xargs)
+
+        # Load version info
+        version=$(grep -P '^\s*version:\s*' "$CONFIG_FILE" | cut -d: -f2 | xargs)
+        developer=$(grep -P '^\s*developer:\s*' "$CONFIG_FILE" | cut -d: -f2 | xargs)
+        release_date=$(grep -P '^\s*release_date:\s*' "$CONFIG_FILE" | cut -d: -f2 | xargs)
+        description=$(grep -P '^\s*description:\s*' "$CONFIG_FILE" | cut -d: -f2 | xargs)
+        contact=$(grep -P '^\s*contact:\s*' "$CONFIG_FILE" | cut -d: -f2 | xargs)
+
+        footer_text=$(grep -P '^\s*footer_text:\s*' "$CONFIG_FILE" | cut -d: -f2 | xargs)
+
+        # Load programs and functions
+        programs_and_functions=()
+        while read -r line; do
+            name=$(echo "$line" | grep -oP '(?<=name: ).*')
+            type=$(echo "$line" | grep -oP '(?<=type: ).*')
+            handler=$(echo "$line" | grep -oP '(?<=command: ).*|(?<=function: ).*')
+            programs_and_functions+=("$name,$type,$handler")
+        done < <(grep -P '^\s*-' "$CONFIG_FILE")
+    else
+        echo "No config file found! Ensure $CONFIG_FILE exists."
+        exit 1
+    fi
+}
+
+# Function Definitions (Custom Logic)
+function fastcom {
+    echo "Enter the command you would like to run:"
+    read -r command
+    eval "${command}"
+    read -p "Press Enter to continue..."
+}
+
+function code_start {
+    local current_dir="$files_directory"
+    while true; do
+        clear
+        echo "Current Directory: $current_dir"
+        echo "-------------------------------"
+        files=( "$current_dir"/* )
+        options=( ".." "${files[@]##*/}" "Exit" )
+
+        # Display menu
+        arrow_menu "${options[@]}"
+        choice=$?
+
+        case $choice in
+            0) current_dir=$(dirname "$current_dir") ;;  # Move up one directory
+            $(( ${#options[@]} - 1 )) ) return ;;       # Exit
+            *) 
+                selected="${files[$((choice-1))]}"
+                if [[ -d "$selected" ]]; then
+                    current_dir="$selected"  # Enter directory
+                elif [[ -f "$selected" ]]; then
+                    echo "Opening $selected in nvim..."
+                    nvim "$selected"
+                else
+                    echo "Invalid selection."
+                fi
+                ;;
+        esac
+    done
+}
+
+# Function to load programs and functions from the config file
+function load_programs_and_functions {
+    menu_options=()
+    handlers=()
+    types=()
+
+    for entry in "${programs_and_functions[@]}"; do
+        IFS=',' read -r name type handler <<< "$entry"
+        menu_options+=("$name")
+        types+=("$type")
+        handlers+=("$handler")
+    done
+}
+
+# Function to display the greeting based on the time of day
+function display_greeting {
+    hour=$(date +%H)
+    if [ "$hour" -ge 5 ] && [ "$hour" -lt 12 ]; then
+        echo -e "$highlight_color$morning_greeting$text_color"
+    elif [ "$hour" -ge 12 ] && [ "$hour" -lt 17 ]; then
+        echo -e "$highlight_color$afternoon_greeting$text_color"
+    elif [ "$hour" -ge 17 ] && [ "$hour" -lt 21 ]; then
+        echo -e "$highlight_color$evening_greeting$text_color"
+    else
+        echo -e "$highlight_color$night_greeting$text_color"
+    fi
+}
+
+# Function to display menu with arrow navigation
+function arrow_menu {
+    local options=("$@")
+    local num_options=${#options[@]}
+    local choice=0
+    local key
+
+    while true; do
+        clear
+        cat << EOF
+      __  __                  
+     |  \/  | ___ _ __  _   _ 
+     | |\/| |/ _ \ '_ \| | | |
+     | |  | |  __/ | | | |_| |
+     |_|  |_|\___|_| |_|\__,_|
+                         
+EOF
+
+        display_greeting
+        echo "--------------------------------------"
+
+        for i in "${!options[@]}"; do
+            if [ $i -eq $choice ]; then
+                echo -e "$highlight_color> ${options[$i]}$text_color"  # Highlight current selection
+            else
+                echo "  ${options[$i]}"
+            fi
+        done
+
+        # Read user input for navigation
+        IFS= read -rsn1 key
+        case "$key" in
+            $'\x1b')  # Escape sequence (arrow keys)
+                read -rsn2 -t 0.1 key
+                case "$key" in
+                    '[A') ((choice=(choice-1+num_options)%num_options)) ;; # Up arrow
+                    '[B') ((choice=(choice+1)%num_options)) ;;            # Down arrow
+                esac
+                ;;
+            "")  # Enter key
+                return $choice
+                ;;
+        esac
+    done
+}
+
+# Main Menu
+function mainmenu {
+    load_programs_and_functions
+
+    while true; do
+        arrow_menu "${menu_options[@]}" "Exit"
+        choice=$?
+
+        if [ "$choice" -eq "${#menu_options[@]}" ]; then
+            exit 0  # Exit
+        elif [ "${types[$choice]}" == "command" ]; then
+            eval "${handlers[$choice]}"  # Execute system command
+        elif [ "${types[$choice]}" == "function" ]; then
+            if declare -f "${handlers[$choice]}" >/dev/null; then
+                "${handlers[$choice]}"  # Execute custom function
+            else
+                echo "Error: Function '${handlers[$choice]}' not found!"
+            fi
+        fi
+    done
+}
+
+# Start the Main Menu
+load_config
+mainmenu
+

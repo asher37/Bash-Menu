@@ -1,0 +1,104 @@
+.\" Manpage for menu script
+.TH MENU 1 "January 2025" "1.0" "Menu Script"
+.SH NAME
+menu \- A customizable terminal menu system for launching programs and navigating files.
+.SH SYNOPSIS
+.B menu
+.SH DESCRIPTION
+The
+.B menu
+script is a terminal-based program that provides a customizable menu system. It allows the user to navigate through different menus, run commands, open files, and explore directories. The script reads its configuration from a YAML file and allows users to add custom commands, functions, and greetings.
+
+The main menu of the script can be easily customized via the
+.B config.yaml
+file, where users can specify program options, greetings, and menu appearance.
+
+.SH CONFIGURATION
+The menu is controlled via the
+.B config.yaml
+file located in the
+.B $HOME/.config/
+directory. Key sections in the configuration file include:
+
+.TP
+.B files_directory
+Default directory for the file browser.
+
+.TP
+.B highlight_color
+The color used to highlight the selected menu option.
+
+.TP
+.B text_color
+The default text color for the menu.
+
+.TP
+.B background_color
+The background color of the menu.
+
+.TP
+.B greetings
+Custom greetings based on the time of day. You can specify greetings for "morning", "afternoon", "evening", and "night".
+
+.TP
+.B footer_text
+Text displayed at the bottom of each menu with a message on how to edit the menu.
+
+.TP
+.B programs_and_functions
+A list of programs and functions that appear in the menu. Each program can be a terminal command or a custom function defined in the script.
+
+.TP
+.B version_info
+Information about the version of the script, developer, release date, etc.
+
+.SH MENU NAVIGATION
+The menu is navigated using arrow keys. The following keys are used to interact with the menu:
+
+.TP
+.B Up Arrow
+Navigate to the previous menu item.
+
+.TP
+.B Down Arrow
+Navigate to the next menu item.
+
+.TP
+.B Enter
+Select the currently highlighted menu item.
+
+.TP
+.B Escape
+Exit the current menu and return to the previous one.
+
+.SH COMMANDS
+The menu system allows users to select from different program options, such as:
+
+.TP
+.B Program Loader
+Launches a program from the list of available commands.
+
+.TP
+.B Code
+Opens a file browser that allows users to navigate directories and open files for editing.
+
+.TP
+.B Fast Command
+Executes a user-provided terminal command.
+
+.TP
+.B Version Info
+Displays the version information of the script.
+
+.SH USAGE EXAMPLES
+To launch the menu, simply run the script:
+
+.PP
+$ ./menu.sh
+
+.SH AUTHOR
+Written by Asher Hildebrand.
+
+.SH SEE ALSO
+.BR bash (1)
+

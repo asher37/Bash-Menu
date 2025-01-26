@@ -1,0 +1,69 @@
+# Configuration File: config.yaml
+# Description: Configuration file for the Ash Menu
+# Author: Asher Hildebrand
+# Date: 2024 Dec 14
+# Version: 1.0
+# License: MIT
+# Email: asher2washer@gmail.com
+
+# General Settings
+# How to edit general settings:
+# 1. Change the value after the colon
+# 2. Save the file
+# 3. Run the menu again
+# 4. The changes should be applied
+# 5. If not, check for errors in the config file
+# 6. If you need help, contact the developer
+files_directory: $HOME  # Default directory for the file browser
+highlight_color: "\e[1;32m"  # Color for highlighted menu options
+text_color: "\e[0m"  # Default text color
+background_color: "\e[40m"  # Background color for the menu
+
+# Custom Greetings
+# How to edit custom greetings:
+# 1. edit the text in the quotes
+# 2. Save the file  
+# 3. Run the menu again
+# 4. The changes should be applied
+greetings:
+  morning: "Good Morning, User!"
+  afternoon: "Good Afternoon, User!"
+  evening: "Good Evening, User!"
+  night: "Good Night, User!"
+
+# Programs and Commands to display in the menu
+# How to add programs and functions:
+# 1. Add a new item to the list
+# 2. Change the name to the name of the program or function
+# 3. Change the type to either command or function
+# 4. Change the command or function to the name of the program or function
+# 5. Save the file
+# 6. Run the menu again
+# example: - name: btop
+#         type: command
+#         command: btop
+programs_and_functions:
+  - name: "File Browser"
+    type: "function"
+    command: "code_start"
+  - name: "Calculator"
+    type: "function"
+    command: "calc"
+  - name: "System Monitor"
+    type: "command"
+    command: "htop"
+  - name: "Exit"
+    type: "command"
+    command: "exit"
+
+# Version Information
+version_info:
+  version: "1.0"
+  developer: "Asher Hildebrand"
+  release_date: "2025 Jan 26"
+  description: "The Bash Menu - A customizable Bash script menu"
+  contact: "asher2washer@gmail.com"
+
+# Footer Text
+footer_text: "To edit this menu, open config.yaml in the .config directory"
+
